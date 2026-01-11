@@ -2,12 +2,15 @@ package daniel.contente.controller;
 
 import daniel.contente.model.Aluno;
 import daniel.contente.service.AlunoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Alunos", description = "Operações relacionadas a alunos")
 @RestController
 @RequestMapping("/alunos")
 public class AlunoController {
@@ -15,50 +18,50 @@ public class AlunoController {
     @Autowired
     private AlunoService alunoService;
 
-    // Endpoint: GET /api/alunos
     @GetMapping
+    @Operation(summary = "Listar todos os alunos")
     public ResponseEntity<List<Aluno>> listarTodos() {
         List<Aluno> alunos = alunoService.listarTodos();
-        return ResponseEntity.ok(alunos); // Retorna 200 OK com a lista
+        return ResponseEntity.ok(alunos);
     }
 
-    // Endpoint: GET /api/alunos/{id}
     @GetMapping("/{id}")
+    @Operation(summary = "Buscar aluno por ID")
     public ResponseEntity<Aluno> buscarPorId(@PathVariable Long id) {
         Aluno aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
     }
 
-    // Endpoint: GET /api/alunos/cpf/{cpf}
     @GetMapping("/cpf/{cpf}")
+    @Operation(summary = "Buscar aluno por CPF")
     public ResponseEntity<Aluno> buscarPorCpf(@PathVariable String cpf) {
         Aluno aluno = alunoService.buscarPorCpf(cpf);
         return ResponseEntity.ok(aluno);
     }
 
-    // Endpoint: GET /api/alunos/matricula/{matricula}
     @GetMapping("/matricula/{matricula}")
+    @Operation(summary = "Buscar aluno por matrícula")
     public ResponseEntity<Aluno> buscarPorMatricula(@PathVariable String matricula) {
         Aluno aluno = alunoService.buscarPorMatricula(matricula);
         return ResponseEntity.ok(aluno);
     }
 
-    // Endpoint: POST /api/alunos
     @PostMapping
-    public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) { // @RequestBody para pegar o corpo da requisição
+    @Operation(summary = "Criar novo aluno")
+    public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) {
         Aluno alunoSalvo = alunoService.salvar(aluno);
         return ResponseEntity.ok(alunoSalvo);
     }
 
-    // Endpoint: PUT /api/alunos/{id}
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar aluno")
     public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody Aluno aluno) {
         Aluno alunoAtualizado = alunoService.atualizar(id, aluno);
         return ResponseEntity.ok(alunoAtualizado);
     }
 
-    // Endpoint: DELETE /api/alunos/{id}
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar aluno")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         boolean deletado = alunoService.deletar(id);
         if (deletado) {
