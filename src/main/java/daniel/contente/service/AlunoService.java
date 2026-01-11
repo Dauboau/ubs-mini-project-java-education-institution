@@ -1,9 +1,10 @@
 package daniel.contente.service;
 
+import daniel.contente.dto.CreateAlunoRequestDTO;
 import daniel.contente.exception.CpfDuplicadoException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
+import daniel.contente.mapper.AlunoMapper;
 import daniel.contente.model.Aluno;
-import daniel.contente.model.Endereco;
 import daniel.contente.plugin.ViaCep.ViaCepResponse;
 import daniel.contente.plugin.ViaCep.ViaCepService;
 import daniel.contente.repository.AlunoRepository;
@@ -54,32 +55,28 @@ public class AlunoService {
         }
     }
 
-    public Aluno salvar(Aluno aluno) {
-        // Validação: CPF único
-        Optional<Aluno> alunoExistente = alunoRepository.findByCpf(aluno.getCpf());
-        if (alunoExistente.isPresent() && !alunoExistente.get().getId().equals(aluno.getId())) {
-            // Se um aluno com o mesmo CPF for encontrado e for um aluno diferente (não uma atualização do mesmo)
-            throw new CpfDuplicadoException("CPF já cadastrado: " + aluno.getCpf());
+    public Aluno salvar(CreateAlunoRequestDTO alunoDto) {
+
+        Optional<Aluno> alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
+        if (alunoExistente.isPresent()) {
+            throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
         }
 
-        // Se o CEP estiver presente no endereço, busca os dados atualizados
-        Endereco endereco = aluno.getEndereco();
-        if (endereco != null && endereco.getCep() != null && !endereco.getCep().isEmpty()) {
-            try {
-                ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(endereco.getCep());
+        try {
+            ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(alunoDto.endereco.cep);
 
-                // Atualiza os campos do endereço com os dados da API
-                endereco.setLogradouro(dadosCep.getLogradouro());
-                endereco.setBairro(dadosCep.getBairro());
-                endereco.setCidade(dadosCep.getCidade());
-                endereco.setEstado(dadosCep.getEstado());
+            // Complementa os dados do endereço
+            alunoDto.endereco.logradouro = dadosCep.logradouro;
+            alunoDto.endereco.bairro = dadosCep.bairro;
+            alunoDto.endereco.cidade = dadosCep.cidade;
+            alunoDto.endereco.estado = dadosCep.estado;
 
-            } catch (Exception e) {
-                throw new RuntimeException("Falha ao integrar com a API de CEP.", e);
-            }
+        } catch (Exception e) {
+            throw new RuntimeException("Falha no Plugin ViaCep.", e);
         }
-        
-        return alunoRepository.save(aluno);
+
+        Aluno newAluno = AlunoMapper.toEntity(alunoDto);
+        return alunoRepository.save(newAluno);
     }
 
     public Aluno atualizar(Long id, Aluno alunoAtualizado) {

@@ -1,9 +1,12 @@
 package daniel.contente.controller;
 
+import daniel.contente.dto.CreateAlunoRequestDTO;
 import daniel.contente.model.Aluno;
 import daniel.contente.service.AlunoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,15 +51,15 @@ public class AlunoController {
 
     @PostMapping
     @Operation(summary = "Criar novo aluno")
-    public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) {
+    public ResponseEntity<Aluno> criar(@RequestBody @Valid CreateAlunoRequestDTO aluno) {
         Aluno alunoSalvo = alunoService.salvar(aluno);
         return ResponseEntity.ok(alunoSalvo);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar aluno")
-    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody Aluno aluno) {
-        Aluno alunoAtualizado = alunoService.atualizar(id, aluno);
+    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody Aluno alunoDto) {
+        Aluno alunoAtualizado = alunoService.atualizar(id, alunoDto);
         return ResponseEntity.ok(alunoAtualizado);
     }
 

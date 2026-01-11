@@ -26,7 +26,7 @@ public class ViaCepService {
             ResponseEntity<ViaCepResponse> response = restTemplate.getForEntity(url, ViaCepResponse.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 ViaCepResponse dados = response.getBody();
-                if (dados != null && dados.getLogradouro() == null) { // ViaCEP retorna { "erro": true } como objeto com campos nulos
+                if (dados != null && dados.logradouro == null) { // ViaCEP retorna { "erro": true } como objeto com campos nulos
                     throw new RecursoNaoEncontradoException("CEP não encontrado na base da ViaCEP: " + cep);
                 }
                 return dados;
