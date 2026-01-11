@@ -1,6 +1,5 @@
 package daniel.contente.controller;
 
-import daniel.contente.exception.RecursoNaoEncontradoException;
 import daniel.contente.model.Professor;
 import daniel.contente.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,58 +23,34 @@ public class ProfessorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Professor> buscarPorId(@PathVariable Long id) {
-        try {
-            Professor professor = professorService.buscarPorId(id);
-            return ResponseEntity.ok(professor);
-        } catch (RecursoNaoEncontradoException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Professor professor = professorService.buscarPorId(id);
+        return ResponseEntity.ok(professor);
     }
 
     // Endpoint: GET /api/professores/cpf/{cpf}
     @GetMapping("/cpf/{cpf}")
     public ResponseEntity<Professor> buscarPorCpf(@PathVariable String cpf) {
-        try {
-            Professor professor = professorService.buscarPorCpf(cpf);
-            return ResponseEntity.ok(professor);
-        } catch (RecursoNaoEncontradoException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Professor professor = professorService.buscarPorCpf(cpf);
+        return ResponseEntity.ok(professor);
     }
 
     // Endpoint: GET /api/professores/departamento/{departamento}
     @GetMapping("/departamento/{departamento}")
     public ResponseEntity<List<Professor>> buscarPorDepartamento(@PathVariable String departamento) {
-        try {
-            List<Professor> professores = professorService.buscarPorDepartamento(departamento);
-            return ResponseEntity.ok(professores);
-        } catch (RecursoNaoEncontradoException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<Professor> professores = professorService.buscarPorDepartamento(departamento);
+        return ResponseEntity.ok(professores);
     }
 
     @PostMapping
     public ResponseEntity<Professor> criar(@RequestBody Professor professor) {
-        try {
-            Professor professorSalvo = professorService.salvar(professor);
-            return ResponseEntity.ok(professorSalvo);
-        } catch (Exception e) {
-            // Pode ser refinado para capturar exceções específicas do serviço (ex: CpfDuplicadoException)
-            return ResponseEntity.badRequest().build(); // Retorna 400 Bad Request em caso de erro genérico
-        }
+        Professor professorSalvo = professorService.salvar(professor);
+        return ResponseEntity.ok(professorSalvo);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Professor> atualizar(@PathVariable Long id, @RequestBody Professor professor) {
-        try {
-            Professor professorAtualizado = professorService.atualizar(id, professor);
-            return ResponseEntity.ok(professorAtualizado);
-        } catch (RecursoNaoEncontradoException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            // Pode ser refinado para capturar exceções específicas do serviço (ex: CpfDuplicadoException)
-            return ResponseEntity.badRequest().build(); // Retorna 400 Bad Request em caso de erro genérico
-        }
+        Professor professorAtualizado = professorService.atualizar(id, professor);
+        return ResponseEntity.ok(professorAtualizado);
     }
 
     @DeleteMapping("/{id}")

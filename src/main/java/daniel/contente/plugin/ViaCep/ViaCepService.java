@@ -21,7 +21,7 @@ public class ViaCepService {
     public ViaCepResponse buscarEnderecoPorCep(String cep) {
 
         String url = URL_VIACEP.replace("{cep}", cep);
-        
+
         try {
             ResponseEntity<ViaCepResponse> response = restTemplate.getForEntity(url, ViaCepResponse.class);
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -31,7 +31,7 @@ public class ViaCepService {
                 }
                 return dados;
             } else {
-                throw new RuntimeException("Erro ao buscar CEP na API externa. Código: " + response.getStatusCodeValue());
+                throw new RuntimeException("Erro ao buscar CEP na API externa. Código: " + response.getStatusCode().value());
             }
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             throw new RuntimeException("Erro HTTP ao chamar a API ViaCEP: " + e.getMessage());
