@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import daniel.contente.dto.CreateAlunoRequestDTO;
+import daniel.contente.dto.AlunoRequestDto;
 import daniel.contente.exception.CpfDuplicadoException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
 import daniel.contente.mapper.AlunoMapper;
@@ -55,7 +55,7 @@ public class AlunoService {
         }
     }
 
-    public Aluno salvar(CreateAlunoRequestDTO alunoDto) {
+    public Aluno salvar(AlunoRequestDto alunoDto) {
         Optional<Aluno> alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
         if (alunoExistente.isPresent()) {
             throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
@@ -78,7 +78,7 @@ public class AlunoService {
         return alunoRepository.save(newAluno);
     }
 
-    public Aluno atualizar(Long id, CreateAlunoRequestDTO alunoDto) {
+    public Aluno atualizar(Long id, AlunoRequestDto alunoDto) {
         Optional<Aluno> alunoExistente = alunoRepository.findById(id);
         if (alunoExistente.isPresent()) {
             Aluno alunoAtualizado = AlunoMapper.toEntity(alunoDto);
@@ -114,7 +114,7 @@ public class AlunoService {
             alunoRepository.deleteById(id);
             return true;
         } else {
-            return false; // Indica que o aluno não foi encontrado e não pôde ser deletado
+            return false;
         }
     }
 }

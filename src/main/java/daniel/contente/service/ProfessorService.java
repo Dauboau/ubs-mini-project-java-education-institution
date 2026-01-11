@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import daniel.contente.dto.CreateProfessorRequestDTO;
+import daniel.contente.dto.ProfessorRequestDto;
 import daniel.contente.exception.CpfDuplicadoException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
 import daniel.contente.mapper.ProfessorMapper;
@@ -55,7 +55,7 @@ public class ProfessorService {
         }
     }
 
-    public Professor salvar(CreateProfessorRequestDTO professorDto) {
+    public Professor salvar(ProfessorRequestDto professorDto) {
         Optional<Professor> professorExistente = professorRepository.findByCpf(professorDto.cpf);
         if (professorExistente.isPresent()) {
             throw new CpfDuplicadoException("CPF já cadastrado: " + professorDto.cpf);
@@ -78,7 +78,7 @@ public class ProfessorService {
         return professorRepository.save(newProfessor);
     }
 
-    public Professor atualizar(Long id, CreateProfessorRequestDTO professorDto) {
+    public Professor atualizar(Long id, ProfessorRequestDto professorDto) {
         Optional<Professor> professorExistente = professorRepository.findById(id);
         if (professorExistente.isPresent()) {
             Professor professorAtualizado = ProfessorMapper.toEntity(professorDto);

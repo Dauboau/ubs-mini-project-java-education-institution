@@ -1,6 +1,8 @@
 package daniel.contente.controller;
 
-import daniel.contente.dto.CreateAlunoRequestDTO;
+import daniel.contente.dto.AlunoRequestDto;
+import daniel.contente.dto.AlunoResponseDto;
+import daniel.contente.mapper.AlunoMapper;
 import daniel.contente.model.Aluno;
 import daniel.contente.service.AlunoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Alunos", description = "Operações relacionadas a alunos")
 @RestController
@@ -23,44 +26,47 @@ public class AlunoController {
 
     @GetMapping
     @Operation(summary = "Listar todos os alunos")
-    public ResponseEntity<List<Aluno>> listarTodos() {
+    public ResponseEntity<List<AlunoResponseDto>> listarTodos() {
         List<Aluno> alunos = alunoService.listarTodos();
-        return ResponseEntity.ok(alunos);
+        List<AlunoResponseDto> dtos = alunos.stream()
+                .map(AlunoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID")
-    public ResponseEntity<Aluno> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<AlunoResponseDto> buscarPorId(@PathVariable Long id) {
         Aluno aluno = alunoService.buscarPorId(id);
-        return ResponseEntity.ok(aluno);
+        return ResponseEntity.ok(AlunoMapper.toResponse(aluno));
     }
 
     @GetMapping("/cpf/{cpf}")
     @Operation(summary = "Buscar aluno por CPF")
-    public ResponseEntity<Aluno> buscarPorCpf(@PathVariable String cpf) {
+    public ResponseEntity<AlunoResponseDto> buscarPorCpf(@PathVariable String cpf) {
         Aluno aluno = alunoService.buscarPorCpf(cpf);
-        return ResponseEntity.ok(aluno);
+        return ResponseEntity.ok(AlunoMapper.toResponse(aluno));
     }
 
     @GetMapping("/matricula/{matricula}")
     @Operation(summary = "Buscar aluno por matrícula")
-    public ResponseEntity<Aluno> buscarPorMatricula(@PathVariable String matricula) {
+    public ResponseEntity<AlunoResponseDto> buscarPorMatricula(@PathVariable String matricula) {
         Aluno aluno = alunoService.buscarPorMatricula(matricula);
-        return ResponseEntity.ok(aluno);
+        return ResponseEntity.ok(AlunoMapper.toResponse(aluno));
     }
 
     @PostMapping
     @Operation(summary = "Criar novo aluno")
-    public ResponseEntity<Aluno> criar(@RequestBody @Valid CreateAlunoRequestDTO alunoDto) {
+    public ResponseEntity<AlunoResponseDto> criar(@RequestBody @Valid AlunoRequestDto alunoDto) {
         Aluno alunoSalvo = alunoService.salvar(alunoDto);
-        return ResponseEntity.ok(alunoSalvo);
+        return ResponseEntity.ok(AlunoMapper.toResponse(alunoSalvo));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar aluno")
-    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody @Valid CreateAlunoRequestDTO alunoDto) {
+    public ResponseEntity<AlunoResponseDto> atualizar(@PathVariable Long id, @RequestBody @Valid AlunoRequestDto alunoDto) {
         Aluno alunoAtualizado = alunoService.atualizar(id, alunoDto);
-        return ResponseEntity.ok(alunoAtualizado);
+        return ResponseEntity.ok(AlunoMapper.toResponse(alunoAtualizado));
     }
 
     @DeleteMapping("/{id}")

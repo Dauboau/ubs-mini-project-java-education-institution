@@ -1,6 +1,8 @@
 package daniel.contente.controller;
 
-import daniel.contente.dto.CreateProfessorRequestDTO;
+import daniel.contente.dto.ProfessorRequestDto;
+import daniel.contente.dto.ProfessorResponseDto;
+import daniel.contente.mapper.ProfessorMapper;
 import daniel.contente.model.Professor;
 import daniel.contente.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Professores", description = "Operações relacionadas a professores")
 @RestController
@@ -23,44 +26,50 @@ public class ProfessorController {
 
     @GetMapping
     @Operation(summary = "Listar todos os professores")
-    public ResponseEntity<List<Professor>> listarTodos() {
+    public ResponseEntity<List<ProfessorResponseDto>> listarTodos() {
         List<Professor> professores = professorService.listarTodos();
-        return ResponseEntity.ok(professores);
+        List<ProfessorResponseDto> dtos = professores.stream()
+                .map(ProfessorMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar professor por ID")
-    public ResponseEntity<Professor> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<ProfessorResponseDto> buscarPorId(@PathVariable Long id) {
         Professor professor = professorService.buscarPorId(id);
-        return ResponseEntity.ok(professor);
+        return ResponseEntity.ok(ProfessorMapper.toResponse(professor));
     }
 
     @GetMapping("/cpf/{cpf}")
     @Operation(summary = "Buscar professor por CPF")
-    public ResponseEntity<Professor> buscarPorCpf(@PathVariable String cpf) {
+    public ResponseEntity<ProfessorResponseDto> buscarPorCpf(@PathVariable String cpf) {
         Professor professor = professorService.buscarPorCpf(cpf);
-        return ResponseEntity.ok(professor);
+        return ResponseEntity.ok(ProfessorMapper.toResponse(professor));
     }
 
     @GetMapping("/departamento/{departamento}")
     @Operation(summary = "Buscar professores por departamento")
-    public ResponseEntity<List<Professor>> buscarPorDepartamento(@PathVariable String departamento) {
+    public ResponseEntity<List<ProfessorResponseDto>> buscarPorDepartamento(@PathVariable String departamento) {
         List<Professor> professores = professorService.buscarPorDepartamento(departamento);
-        return ResponseEntity.ok(professores);
+        List<ProfessorResponseDto> dtos = professores.stream()
+                .map(ProfessorMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping
     @Operation(summary = "Criar novo professor")
-    public ResponseEntity<Professor> criar(@RequestBody @Valid CreateProfessorRequestDTO professorDto) {
+    public ResponseEntity<ProfessorResponseDto> criar(@RequestBody @Valid ProfessorRequestDto professorDto) {
         Professor professorSalvo = professorService.salvar(professorDto);
-        return ResponseEntity.ok(professorSalvo);
+        return ResponseEntity.ok(ProfessorMapper.toResponse(professorSalvo));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar professor")
-    public ResponseEntity<Professor> atualizar(@PathVariable Long id, @RequestBody @Valid CreateProfessorRequestDTO professorDto) {
+    public ResponseEntity<ProfessorResponseDto> atualizar(@PathVariable Long id, @RequestBody @Valid ProfessorRequestDto professorDto) {
         Professor professorAtualizado = professorService.atualizar(id, professorDto);
-        return ResponseEntity.ok(professorAtualizado);
+        return ResponseEntity.ok(ProfessorMapper.toResponse(professorAtualizado));
     }
 
     @DeleteMapping("/{id}")
