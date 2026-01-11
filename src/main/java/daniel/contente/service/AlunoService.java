@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import daniel.contente.dto.AlunoRequestDto;
 import daniel.contente.exception.CpfDuplicadoException;
+import daniel.contente.exception.MatriculaDuplicadaException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
 import daniel.contente.mapper.AlunoMapper;
 import daniel.contente.model.Aluno;
@@ -60,6 +61,10 @@ public class AlunoService {
         if (alunoExistente.isPresent()) {
             throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
         }
+        alunoExistente = alunoRepository.findByMatricula(alunoDto.matricula);
+        if (alunoExistente.isPresent()) {
+            throw new MatriculaDuplicadaException("Matrícula já cadastrada: " + alunoDto.matricula);
+        }
 
         try {
             ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(alunoDto.endereco.cep);
@@ -100,6 +105,11 @@ public class AlunoService {
             alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
             if (alunoExistente.isPresent()) {
                 throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
+            }
+
+            alunoExistente = alunoRepository.findByMatricula(alunoDto.matricula);
+            if (alunoExistente.isPresent()) {
+                throw new MatriculaDuplicadaException("Matrícula já cadastrada: " + alunoDto.matricula);
             }
 
             return alunoRepository.save(alunoAtualizado);

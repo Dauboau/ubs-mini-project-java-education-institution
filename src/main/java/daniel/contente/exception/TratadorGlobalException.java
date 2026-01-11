@@ -21,8 +21,8 @@ public class TratadorGlobalException {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
-    @ExceptionHandler(CpfDuplicadoException.class)
-    public ResponseEntity<Object> handleCpfDuplicado(CpfDuplicadoException ex) {
+    @ExceptionHandler({CpfDuplicadoException.class, MatriculaDuplicadaException.class})
+    public ResponseEntity<Object> handleCpfDuplicado(RuntimeException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("error", "Bad Request");
         body.put("message", ex.getMessage());

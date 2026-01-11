@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Aluno extends Usuario {
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String matricula;
 }
