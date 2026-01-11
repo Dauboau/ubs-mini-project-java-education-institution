@@ -1,6 +1,7 @@
 package daniel.contente.config;
 
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,12 @@ public class OpenApiConfig {
             .info(new Info()
                 .title("API UBS - Instituição Educacional")
                 .version("1.0.0")
-                .description("API para gerenciar Alunos e Professores da instituição de Ensino."));
+                .description("API para gerenciar Alunos e Professores da instituição de Ensino.")
+            )
+            .externalDocs(new ExternalDocumentation()
+                .description("Página do GitHub")
+                .url("https://github.com/Dauboau/ubs-mini-project-java-education-institution")
+            );
     }
 
 }
