@@ -3,6 +3,9 @@ package daniel.contente.service;
 import daniel.contente.exception.CpfDuplicadoException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
 import daniel.contente.model.Aluno;
+import daniel.contente.model.Endereco;
+import daniel.contente.plugin.ViaCep.ViaCepResponse;
+import daniel.contente.plugin.ViaCep.ViaCepService;
 import daniel.contente.repository.AlunoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,9 @@ public class AlunoService {
 
     @Autowired
     private AlunoRepository alunoRepository;
+
+    @Autowired
+    private ViaCepService viaCepService;
 
     public List<Aluno> listarTodos() {
         return alunoRepository.findAll();
@@ -55,6 +61,24 @@ public class AlunoService {
             // Se um aluno com o mesmo CPF for encontrado e for um aluno diferente (não uma atualização do mesmo)
             throw new CpfDuplicadoException("CPF já cadastrado: " + aluno.getCpf());
         }
+
+        // Se o CEP estiver presente no endereço, busca os dados atualizados
+        Endereco endereco = aluno.getEndereco();
+        if (endereco != null && endereco.getCep() != null && !endereco.getCep().isEmpty()) {
+            try {
+                ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(endereco.getCep());
+
+                // Atualiza os campos do endereço com os dados da API
+                endereco.setLogradouro(dadosCep.getLogradouro());
+                endereco.setBairro(dadosCep.getBairro());
+                endereco.setCidade(dadosCep.getCidade());
+                endereco.setEstado(dadosCep.getEstado());
+
+            } catch (Exception e) {
+                throw new RuntimeException("Falha ao integrar com a API de CEP.", e);
+            }
+        }
+        
         return alunoRepository.save(aluno);
     }
 
