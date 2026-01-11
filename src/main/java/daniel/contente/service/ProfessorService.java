@@ -88,17 +88,17 @@ public class ProfessorService {
                 ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(professorDto.endereco.cep);
 
                 // Complementa os dados do endereço
-                professorDto.endereco.logradouro = dadosCep.logradouro;
-                professorDto.endereco.bairro = dadosCep.bairro;
-                professorDto.endereco.cidade = dadosCep.cidade;
-                professorDto.endereco.estado = dadosCep.estado;
+                professorAtualizado.getEndereco().setLogradouro(dadosCep.logradouro);
+                professorAtualizado.getEndereco().setBairro(dadosCep.bairro);
+                professorAtualizado.getEndereco().setCidade(dadosCep.cidade);
+                professorAtualizado.getEndereco().setEstado(dadosCep.estado);
 
             } catch (Exception e) {
                 throw new RuntimeException("Falha no Plugin ViaCep.", e);
             }
 
             professorExistente = professorRepository.findByCpf(professorDto.cpf);
-            if (professorExistente.isPresent()) {
+            if (professorExistente.isPresent() && professorExistente.get().getId() != professorAtualizado.getId()) {
                 throw new CpfDuplicadoException("CPF já cadastrado: " + professorDto.cpf);
             }
 

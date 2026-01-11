@@ -93,22 +93,22 @@ public class AlunoService {
                 ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(alunoDto.endereco.cep);
 
                 // Complementa os dados do endereço
-                alunoDto.endereco.logradouro = dadosCep.logradouro;
-                alunoDto.endereco.bairro = dadosCep.bairro;
-                alunoDto.endereco.cidade = dadosCep.cidade;
-                alunoDto.endereco.estado = dadosCep.estado;
+                alunoAtualizado.getEndereco().setLogradouro(dadosCep.logradouro);
+                alunoAtualizado.getEndereco().setBairro(dadosCep.bairro);
+                alunoAtualizado.getEndereco().setCidade(dadosCep.cidade);
+                alunoAtualizado.getEndereco().setEstado(dadosCep.estado);
 
             } catch (Exception e) {
                 throw new RuntimeException("Falha no Plugin ViaCep.", e);
             }
 
             alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
-            if (alunoExistente.isPresent()) {
+            if (alunoExistente.isPresent() && alunoExistente.get().getId() != alunoAtualizado.getId()) {
                 throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
             }
 
             alunoExistente = alunoRepository.findByMatricula(alunoDto.matricula);
-            if (alunoExistente.isPresent()) {
+            if (alunoExistente.isPresent() && alunoExistente.get().getId() != alunoAtualizado.getId()) {
                 throw new MatriculaDuplicadaException("Matrícula já cadastrada: " + alunoDto.matricula);
             }
 
