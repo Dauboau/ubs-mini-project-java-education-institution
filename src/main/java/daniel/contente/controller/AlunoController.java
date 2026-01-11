@@ -51,14 +51,14 @@ public class AlunoController {
 
     @PostMapping
     @Operation(summary = "Criar novo aluno")
-    public ResponseEntity<Aluno> criar(@RequestBody @Valid CreateAlunoRequestDTO aluno) {
-        Aluno alunoSalvo = alunoService.salvar(aluno);
+    public ResponseEntity<Aluno> criar(@RequestBody @Valid CreateAlunoRequestDTO alunoDto) {
+        Aluno alunoSalvo = alunoService.salvar(alunoDto);
         return ResponseEntity.ok(alunoSalvo);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar aluno")
-    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody Aluno alunoDto) {
+    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody @Valid CreateAlunoRequestDTO alunoDto) {
         Aluno alunoAtualizado = alunoService.atualizar(id, alunoDto);
         return ResponseEntity.ok(alunoAtualizado);
     }

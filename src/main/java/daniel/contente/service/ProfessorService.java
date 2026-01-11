@@ -1,21 +1,28 @@
 package daniel.contente.service;
 
-import daniel.contente.exception.CpfDuplicadoException;
-import daniel.contente.exception.RecursoNaoEncontradoException;
-import daniel.contente.model.Professor;
-import daniel.contente.repository.ProfessorRepository;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import daniel.contente.dto.CreateProfessorRequestDTO;
+import daniel.contente.exception.CpfDuplicadoException;
+import daniel.contente.exception.RecursoNaoEncontradoException;
+import daniel.contente.mapper.ProfessorMapper;
+import daniel.contente.model.Professor;
+import daniel.contente.plugin.ViaCep.ViaCepResponse;
+import daniel.contente.plugin.ViaCep.ViaCepService;
+import daniel.contente.repository.ProfessorRepository;
 
 @Service
 public class ProfessorService {
 
     @Autowired
     private ProfessorRepository professorRepository;
+
+    @Autowired
+    private ViaCepService viaCepService;
 
     public List<Professor> listarTodos() {
         return professorRepository.findAll();
@@ -48,24 +55,53 @@ public class ProfessorService {
         }
     }
 
-    public Professor salvar(Professor professor) {
-        // Validação: CPF único
-        Optional<Professor> professorExistente = professorRepository.findByCpf(professor.getCpf());
-        if (professorExistente.isPresent() && !professorExistente.get().getId().equals(professor.getId())) {
-            throw new CpfDuplicadoException("CPF já cadastrado: " + professor.getCpf());
+    public Professor salvar(CreateProfessorRequestDTO professorDto) {
+        Optional<Professor> professorExistente = professorRepository.findByCpf(professorDto.cpf);
+        if (professorExistente.isPresent()) {
+            throw new CpfDuplicadoException("CPF já cadastrado: " + professorDto.cpf);
         }
-        return professorRepository.save(professor);
+
+        try {
+            ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(professorDto.endereco.cep);
+            
+            // Complementa os dados do endereço
+            professorDto.endereco.logradouro = dadosCep.logradouro;
+            professorDto.endereco.bairro = dadosCep.bairro;
+            professorDto.endereco.cidade = dadosCep.cidade;
+            professorDto.endereco.estado = dadosCep.estado;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Falha no Plugin ViaCep.", e);
+        }
+
+        Professor newProfessor = ProfessorMapper.toEntity(professorDto);
+        return professorRepository.save(newProfessor);
     }
 
-    public Professor atualizar(Long id, Professor professorAtualizado) {
+    public Professor atualizar(Long id, CreateProfessorRequestDTO professorDto) {
         Optional<Professor> professorExistente = professorRepository.findById(id);
         if (professorExistente.isPresent()) {
-            professorAtualizado.setId(id);
-            // Validação: CPF único (exceto para o próprio professor sendo atualizado)
-            Optional<Professor> professorComMesmoCpf = professorRepository.findByCpf(professorAtualizado.getCpf());
-            if (professorComMesmoCpf.isPresent() && !professorComMesmoCpf.get().getId().equals(id)) {
-                throw new CpfDuplicadoException("CPF já cadastrado por outro professor: " + professorAtualizado.getCpf());
+            Professor professorAtualizado = ProfessorMapper.toEntity(professorDto);
+            professorAtualizado.setId(id); // Mantém o ID existente
+
+            try {
+                ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(professorDto.endereco.cep);
+
+                // Complementa os dados do endereço
+                professorDto.endereco.logradouro = dadosCep.logradouro;
+                professorDto.endereco.bairro = dadosCep.bairro;
+                professorDto.endereco.cidade = dadosCep.cidade;
+                professorDto.endereco.estado = dadosCep.estado;
+
+            } catch (Exception e) {
+                throw new RuntimeException("Falha no Plugin ViaCep.", e);
             }
+
+            professorExistente = professorRepository.findByCpf(professorDto.cpf);
+            if (professorExistente.isPresent()) {
+                throw new CpfDuplicadoException("CPF já cadastrado: " + professorDto.cpf);
+            }
+
             return professorRepository.save(professorAtualizado);
         } else {
             throw new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id);

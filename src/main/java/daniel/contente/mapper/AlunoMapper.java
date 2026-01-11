@@ -19,7 +19,6 @@ public final class AlunoMapper {
         if (alunoDto.endereco != null) {
             aluno.setEndereco(mapEndereco(alunoDto.endereco));
         }
-
         return aluno;
     }
 

@@ -1,5 +1,11 @@
 package daniel.contente.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import daniel.contente.dto.CreateAlunoRequestDTO;
 import daniel.contente.exception.CpfDuplicadoException;
 import daniel.contente.exception.RecursoNaoEncontradoException;
@@ -8,12 +14,6 @@ import daniel.contente.model.Aluno;
 import daniel.contente.plugin.ViaCep.ViaCepResponse;
 import daniel.contente.plugin.ViaCep.ViaCepService;
 import daniel.contente.repository.AlunoRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AlunoService {
@@ -56,7 +56,6 @@ public class AlunoService {
     }
 
     public Aluno salvar(CreateAlunoRequestDTO alunoDto) {
-
         Optional<Aluno> alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
         if (alunoExistente.isPresent()) {
             throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
@@ -79,16 +78,30 @@ public class AlunoService {
         return alunoRepository.save(newAluno);
     }
 
-    public Aluno atualizar(Long id, Aluno alunoAtualizado) {
+    public Aluno atualizar(Long id, CreateAlunoRequestDTO alunoDto) {
         Optional<Aluno> alunoExistente = alunoRepository.findById(id);
         if (alunoExistente.isPresent()) {
-            // Garante que o ID do aluno atualizado seja o mesmo do encontrado
-            alunoAtualizado.setId(id);
-            // Validação: CPF único (exceto para o próprio aluno sendo atualizado)
-            Optional<Aluno> alunoComMesmoCpf = alunoRepository.findByCpf(alunoAtualizado.getCpf());
-            if (alunoComMesmoCpf.isPresent() && !alunoComMesmoCpf.get().getId().equals(id)) {
-                throw new CpfDuplicadoException("CPF já cadastrado por outro aluno: " + alunoAtualizado.getCpf());
+            Aluno alunoAtualizado = AlunoMapper.toEntity(alunoDto);
+            alunoAtualizado.setId(id); // Mantém o ID existente
+
+            try {
+                ViaCepResponse dadosCep = viaCepService.buscarEnderecoPorCep(alunoDto.endereco.cep);
+
+                // Complementa os dados do endereço
+                alunoDto.endereco.logradouro = dadosCep.logradouro;
+                alunoDto.endereco.bairro = dadosCep.bairro;
+                alunoDto.endereco.cidade = dadosCep.cidade;
+                alunoDto.endereco.estado = dadosCep.estado;
+
+            } catch (Exception e) {
+                throw new RuntimeException("Falha no Plugin ViaCep.", e);
             }
+
+            alunoExistente = alunoRepository.findByCpf(alunoDto.cpf);
+            if (alunoExistente.isPresent()) {
+                throw new CpfDuplicadoException("CPF já cadastrado: " + alunoDto.cpf);
+            }
+
             return alunoRepository.save(alunoAtualizado);
         } else {
             throw new RecursoNaoEncontradoException("Aluno não encontrado com ID: " + id);
