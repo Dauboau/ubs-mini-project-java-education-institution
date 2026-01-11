@@ -3,7 +3,6 @@ package daniel.contente.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import daniel.contente.dto.ProfessorRequestDto;
@@ -18,11 +17,13 @@ import daniel.contente.repository.ProfessorRepository;
 @Service
 public class ProfessorService {
 
-    @Autowired
     private ProfessorRepository professorRepository;
-
-    @Autowired
     private ViaCepService viaCepService;
+
+    public ProfessorService(ProfessorRepository professorRepository, ViaCepService viaCepService) {
+        this.professorRepository = professorRepository;
+        this.viaCepService = viaCepService;
+    }
 
     public List<Professor> listarTodos() {
         return professorRepository.findAll();
