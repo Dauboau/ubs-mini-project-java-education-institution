@@ -34,7 +34,7 @@ import daniel.contente.repository.AlunoRepository;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(daniel.contente.config.TestViaCepConfig.class)
-public class AlunoControllerTestesFuncionais {
+public class AlunoControllerTestesFuncionaisTestCase {
 
     @Autowired
     private MockMvc mockMvc;
